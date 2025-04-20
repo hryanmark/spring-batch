@@ -14,6 +14,8 @@ import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 
 import entity.Customer;
 import lombok.AllArgsConstructor;
@@ -90,6 +92,7 @@ public class SpringBatchConfig {
 				.reader(reader())
 				.processor(processor())
 				.writer(writer())
+				.taskExecutor(taskExecutor())
 				.build(); 
 	}
 	
@@ -100,6 +103,15 @@ public class SpringBatchConfig {
 				.flow(step1()) //can be multiple flow if more steps required
 				.end()
 				.build();
+	}
+	
+	//TO run job asynchronously (faster than synchronous)
+	@Bean
+	public TaskExecutor taskExecutor() {
+		SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor();
+		asyncTaskExecutor.setConcurrencyLimit(10); //execute 10 records concurrently 
+		
+		return asyncTaskExecutor;
 	}
 	
 }
