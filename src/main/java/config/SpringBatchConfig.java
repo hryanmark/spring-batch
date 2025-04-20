@@ -105,11 +105,11 @@ public class SpringBatchConfig {
 				.build();
 	}
 	
-	//TO run job asynchronously (faster than synchronous)
+	//TO run job asynchronously (faster process than synchronous)
 	@Bean
 	public TaskExecutor taskExecutor() {
 		SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor();
-		asyncTaskExecutor.setConcurrencyLimit(10); //execute 10 records concurrently 
+		asyncTaskExecutor.setConcurrencyLimit(10); //execute 10 records concurrently (multi-threading)
 		
 		return asyncTaskExecutor;
 	}
