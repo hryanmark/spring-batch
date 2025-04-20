@@ -1,8 +1,8 @@
-package config;
+package com.hryanmark.springbatch.config;
 
 import org.springframework.batch.item.ItemProcessor;
 
-import entity.Customer;
+import com.hryanmark.springbatch.entity.Customer;
 
 public class CustomerProcessor implements ItemProcessor<Customer, Customer>{
 

@@ -1,35 +1,35 @@
-package config;
+package com.hryanmark.springbatch.config;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import entity.Customer;
+import com.hryanmark.springbatch.entity.Customer;
+import com.hryanmark.springbatch.repository.CustomerRepository;
+
 import lombok.AllArgsConstructor;
-import repository.CustomerRepository;
 
 @Configuration
-@EnableBatchProcessing
 @AllArgsConstructor
 public class SpringBatchConfig {
-
-	private JobBuilderFactory jobBuilderFactory;
 	
-	private StepBuilderFactory stepBuilderFactory;
-	
+	@Autowired
 	private CustomerRepository customerRepository;
 	
 	//Read from dataSource (csv, db or other datasource)
@@ -37,24 +37,25 @@ public class SpringBatchConfig {
 	@Bean
 	public FlatFileItemReader<Customer> reader(){
 		
-		FlatFileItemReader itemReader = new FlatFileItemReader<>();
-		itemReader.setResource(new FileSystemResource("src/main/resources/customer.csv"));
+		FlatFileItemReader<Customer> itemReader = new FlatFileItemReader<>();
+		itemReader.setResource(new FileSystemResource("src/main/resources/customers.csv"));
 		itemReader.setName("csvReader"); //name of your reader
-		itemReader.setLineMapper(1);
-		itemReader.setLineMapper(mapper()); //Skip the first row (usually title headers)
+		itemReader.setLinesToSkip(1);//Skip the first row (usually title headers)
+		itemReader.setStrict(false);
+		itemReader.setLineMapper(mapper()); 
 		
 		return itemReader;
 	}
 
 	private LineMapper<Customer> mapper() {
-		DefaultLineMappe<Customer> lineMapper = new DefaultLineMapper<>();
+		DefaultLineMapper<Customer> lineMapper = new DefaultLineMapper<>();
 
 
 		//setting delimiter of the csv file
 		DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
 		lineTokenizer.setDelimiter(",");
-		lineTokenizer.setStrict(false);
 		lineTokenizer.setNames("id", "firstName", "lastName", "email", "gender", "contactNo", "country", "dob");
+		lineTokenizer.setStrict(false);
 		
 		
 		//Mapping fields read from csv to Customer entity
@@ -64,6 +65,7 @@ public class SpringBatchConfig {
 		
 		lineMapper.setLineTokenizer(lineTokenizer);
 		lineMapper.setFieldSetMapper(fieldMapper);
+		
 		return lineMapper;
 	}
 	
@@ -87,20 +89,21 @@ public class SpringBatchConfig {
 	//(csv-step) name of your step. chunk(10) process 10 records at a time
 	//For step component to use in a job
 	@Bean
-	public Step step1() {
-		return stepBuilderFactory.get("csv-step").<Customer, Customer> chunk(10)
+	public Step step1(JobRepository jobRepository, PlatformTransactionManager transManager) {
+		return new StepBuilder("csv-step", jobRepository)
+				.<Customer, Customer> chunk(10, transManager)
 				.reader(reader())
 				.processor(processor())
 				.writer(writer())
-				.taskExecutor(taskExecutor())
+//				.taskExecutor(taskExecutor())
 				.build(); 
 	}
 	
 	//For job component to use in JobLauncher (controller)
 	@Bean
-	public Job runJob() {
-		return jobBuilderFactory.get("importCustomers") //(importCustomer) name of your job.
-				.flow(step1()) //can be multiple flow if more steps required
+	public Job runJob(JobRepository jobRepository, PlatformTransactionManager transManager) {
+		return new JobBuilder("importCustomers", jobRepository) //(importCustomer) name of your job.
+				.flow(step1(jobRepository, transManager)) //can be multiple flow if more steps required
 				.end()
 				.build();
 	}

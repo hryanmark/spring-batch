@@ -1,4 +1,4 @@
-package controller;
+package com.hryanmark.springbatch.controller;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -9,6 +9,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +35,10 @@ public class JobController {
 				| JobParametersInvalidException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@GetMapping("/greeting")
+	public String displayHi() {
+		return "Hi there";
 	}
 }
