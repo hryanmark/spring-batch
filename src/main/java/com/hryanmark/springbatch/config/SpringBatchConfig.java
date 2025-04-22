@@ -54,7 +54,7 @@ public class SpringBatchConfig {
 		//setting delimiter of the csv file
 		DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
 		lineTokenizer.setDelimiter(",");
-		lineTokenizer.setNames("id", "firstName", "lastName", "email", "gender", "contactNo", "country", "dob");
+		lineTokenizer.setNames("id", "first_name", "last_name", "email_", "gender_", "contact_no", "country_", "dob_");
 		lineTokenizer.setStrict(false);
 		
 		

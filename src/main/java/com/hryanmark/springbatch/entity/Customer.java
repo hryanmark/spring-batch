@@ -9,10 +9,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @Table(name="customer")
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class Customer {
 	
 	@Id
@@ -20,23 +20,23 @@ public class Customer {
 	private Long id;
 	
 	@Column(name = "first_name")
-	private String firstName;
+	private String first_name;
 	
 	@Column(name = "last_name")
-	private String lastName;
+	private String last_name;
 	
 	@Column(name = "email")
-	private String email;
+	private String email_;
 	
 	@Column(name = "gender")
-	private String gender;
+	private String gender_;
 	
 	@Column(name = "contact")
-	private String contactNo;
+	private String contact_no;
 	
 	@Column(name = "country")
-	private String country;
+	private String country_;
 	
 	@Column(name = "dob")
-	private String dob;
+	private String dob_;
 }
